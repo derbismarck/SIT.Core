@@ -150,7 +150,7 @@ namespace SIT.Core.Coop.Player.FirearmControllerPatches
                     {
                         firearmCont.SetTriggerPressed(pressed);
                         //if (pressed && dict.ContainsKey("rX"))
-                        if (pressed && tpp.rX != 0)
+                        if (prc.IsClientDrone && pressed && tpp.rX != 0)
                         {
                             var rotat = new Vector2(tpp.rX, tpp.rY);
                             player.Rotation = rotat;
