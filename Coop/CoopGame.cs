@@ -139,7 +139,7 @@ namespace SIT.Core.Coop
             BotCreator botCreator = new BotCreator(this, botsPresets, new Func<Profile, Vector3, Task<LocalPlayer>>(this.method_16));
             BotZone[] array = LocationScene.GetAllObjects<BotZone>(false).ToArray<BotZone>();
             this.PBotsController.Init(this, botCreator, array, spawnSystem, this.wavesSpawnScenario_0.BotLocationModifier, controllerSettings.IsEnabled, controllerSettings.IsScavWars, false, false, false, Singleton<GameWorld>.Instance, base.Location_0.OpenZones);
-            int numberOfBots = !MatchmakerAcceptPatches.IsClient ? 12 : 0;
+            int numberOfBots = !MatchmakerAcceptPatches.IsClient ? 20 : 0;
             this.PBotsController.SetSettings(numberOfBots, this.BackEndSession.BackEndConfig.BotPresets, this.BackEndSession.BackEndConfig.BotWeaponScatterings);
             this.PBotsController.AddActivePLayer(this.gparam_0.Player);
             yield return new WaitForSeconds(startDelay);
