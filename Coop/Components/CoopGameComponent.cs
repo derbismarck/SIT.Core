@@ -167,7 +167,7 @@ namespace SIT.Core.Coop
                 ServerHasStoppedActioned = true;
                 try
                 {
-                    LocalGameInstance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, ExitStatus.Runner, "", 0);
+                    LocalGameInstance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, ExitStatus.Survived, "", 0);
                 }
                 catch { }
                 return;
