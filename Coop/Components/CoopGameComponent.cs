@@ -1084,6 +1084,13 @@ namespace SIT.Core.Coop
             var numberOfPlayers = Players.Count(x => x.Value.ProfileId.StartsWith("pmc"));
             GUI.Label(rect, $"Players: {numberOfPlayers}");
 
+            var numberOfLiveAI = Players.Count(x => !x.Value.ProfileId.StartsWith("pmc") && x.Value.HealthController.IsAlive);
+            var numberOfDeadAI = Players.Count(x => !x.Value.ProfileId.StartsWith("pmc") && !x.Value.HealthController.IsAlive);
+            rect.y += 15;
+            GUI.Label(rect, $"Live AI: {numberOfLiveAI}");
+            rect.y += 15;
+            GUI.Label(rect, $"Dead AI: {numberOfDeadAI}");
+
             OnGUI_DrawPlayerList(rect);
         }
 
