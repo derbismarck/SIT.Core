@@ -717,25 +717,37 @@ namespace SIT.Core.Coop
 
         private void CreateLocalPlayer(Profile profile, Vector3 position, int playerId)
         {
-            var otherPlayer = LocalPlayer.Create(playerId
-               , position
-               , Quaternion.identity
-               ,
-               "Player",
-               ""
-               , EPointOfView.ThirdPerson
-               , profile
-               , aiControl: false
-               , EUpdateQueue.Update
-               , EFT.Player.EUpdateMode.Auto
-               , EFT.Player.EUpdateMode.Auto
-               , BackendConfigManager.Config.CharacterController.ClientPlayerMode
-               , () => Singleton<SettingsManager>.Instance.Control.Settings.MouseSensitivity
-               , () => Singleton<SettingsManager>.Instance.Control.Settings.MouseAimingSensitivity
-               , new CoopStatisticsManager()
-               , FilterCustomizationClass.Default
-               , null
-               , isYourPlayer: false).Result;
+            // If this is an actual PLAYER player that we're creating a drone for, when we set
+            // aiControl to true then they'll automatically run voice lines (eg when throwing
+            // a grenade) so we need to make sure it's set to FALSE for the drone version of them.
+            var useAiControl = !profile.Id.StartsWith("pmc");
+
+            // For actual bots, we can gain SIGNIFICANT clientside performance on the
+            // non-host client by ENABLING aiControl for the bot. This has zero consequences
+            // in terms of synchronization. No idea why having aiControl OFF is so expensive,
+            // perhaps it's more accurate to think of it as an inverse bool of
+            // "player controlled", where the engine has to enable a bunch of additional
+            // logic when aiControl is turned off (in other words, for players)?
+
+            var otherPlayer = LocalPlayer.Create(playerId // playerId: The unique identifier for the player
+               , position // position: The starting position for the player in the game world
+               , Quaternion.identity // rotation: The starting rotation for the player. Here it's set to "no rotation" with Quaternion.identity
+               , "Player" // layerName: The layer this player belongs to. Used for things like collision detection
+               , "" // prefix: A string that might be used for naming or categorizing the player
+               , EPointOfView.ThirdPerson // pointOfView: The camera view for this player. Here it's set to third person
+               , profile // profile: The Profile object containing data about this player
+               , aiControl: useAiControl // aiControl: Boolean indicating whether this player is controlled by AI or not. Here it's set to false, so it's not AI controlled
+               , EUpdateQueue.Update // updateQueue: Which update queue this player should use. Here it's set to the standard Update queue
+               , EFT.Player.EUpdateMode.Auto // armsUpdateMode: The update mode for the player's arms. Here it's set to automatically update
+               , EFT.Player.EUpdateMode.Auto // bodyUpdateMode: The update mode for the player's body. Here it's set to automatically update
+               , BackendConfigManager.Config.CharacterController.ClientPlayerMode // characterControllerMode: The mode for the player's character controller, set from the backend config
+               , () => Singleton<SettingsManager>.Instance.Control.Settings.MouseSensitivity // getSensitivity: A function that returns the mouse sensitivity for this player
+               , () => Singleton<SettingsManager>.Instance.Control.Settings.MouseAimingSensitivity // getAimingSensitivity: A function that returns the mouse aiming sensitivity for this player
+               , new CoopStatisticsManager() // statisticsManager: An instance of the class for managing player statistics
+               , FilterCustomizationClass.Default // filter: A filter used for customization, set to the default filter
+               , null // questController: A controller for managing quests. Here it's set to null, indicating no quests for this player
+               , isYourPlayer: false // isYourPlayer: Boolean indicating whether this player is the user's player. Here it's set to false, so this is not the user's player
+            ).Result;
 
 
             if (otherPlayer == null)
