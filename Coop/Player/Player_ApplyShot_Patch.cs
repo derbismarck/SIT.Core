@@ -27,9 +27,9 @@ namespace SIT.Core.Coop.Player
         [PatchPrefix]
         public static bool PrePatch(EFT.Player __instance)
         {
-            var result = false;
-            if (CallLocally.TryGetValue(__instance.Profile.AccountId, out var expecting) && expecting)
-                result = true;
+            var result = true;
+            if (CallLocally.TryGetValue(__instance.Profile.AccountId, out var expecting) && !expecting)
+                result = false;
 
             return result;
         }
