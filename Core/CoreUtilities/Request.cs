@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
@@ -148,9 +149,17 @@ namespace SIT.Tarkov.Core
 
         private void WebSocket_OnMessage(object sender, WebSocketSharp.MessageEventArgs e)
         {
-            var packet = JsonConvert.DeserializeObject<Dictionary<string, object>>(e.Data);
             if (CoopGameComponent.TryGetCoopGameComponent(out var coopGameComponent))
             {
+                var packet = JsonConvert.DeserializeObject<Dictionary<string, object>>(e.Data);
+                var packetHash = ComputePacketHash(packet);
+
+                // TODO: Figure out why it's possible to receive duplicated messages here in the first place and fix actual the root cause
+                if (coopGameComponent.LastPacketHash == packetHash)
+                    return;
+
+                coopGameComponent.LastPacketHash = packetHash;
+
                 // -------------------------------------------------------
                 // WARNING: This can cause Unity crash (different threads) but would be ideal >> FAST << sync logic! If it worked!
                 // coopGameComponent.ReadFromServerLastActionsParseData(packet);
@@ -202,6 +211,15 @@ namespace SIT.Tarkov.Core
                 if (!coopGameComponent.ActionPackets.Contains(packet))
                     coopGameComponent.ActionPackets.TryAdd(packet);
             }
+        }
+
+        private string ComputePacketHash(Dictionary<string, object> packet)
+        {
+            var packetString = string.Join(",", packet.Select(kv => $"{kv.Key}:{kv.Value}"));
+            using MD5 md5 = MD5.Create();
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(packetString);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
         }
 
         public static Request GetRequestInstance(bool createInstance = false, BepInEx.Logging.ManualLogSource logger = null)

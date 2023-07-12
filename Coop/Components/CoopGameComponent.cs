@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -929,36 +930,55 @@ namespace SIT.Core.Coop
             if (!Players.Any(x => x.Key == accountId) && !registeredPlayers.Any(x => x.Profile.AccountId == accountId))
                 return;
 
+            int index = 0;
+
+            HashSet<int> processedPlayers = new HashSet<int>();
+
             foreach (var plyr in
                 Players.ToArray()
                 .Where(x => x.Key == accountId)
                 .Where(x => x.Value != null)
                 )
             {
+                if (processedPlayers.Contains(plyr.Value.PlayerId))
+                    continue;
+
                 if (plyr.Value.TryGetComponent<PlayerReplicatedComponent>(out var prc))
                 {
+                    //Logger.LogDebug($"[{Time.frameCount}]     Processing packet for [{accountId}, {plyr.Value.PlayerId}, {plyr.Value.Id}] [{index}]");
                     prc.ProcessPacket(packet);
                 }
                 else
                 {
                     Logger.LogError($"Player {accountId} doesn't have a PlayerReplicatedComponent!");
                 }
+
+                processedPlayers.Add(plyr.Value.PlayerId);
+                index++;
             }
 
             try
             {
+                index = 0;
                 // Deal to all versions of this guy
                 foreach (var plyr in Singleton<GameWorld>.Instance.RegisteredPlayers
                     .Where(x => x.Profile != null && x.Profile.AccountId == accountId))
                 {
+                    if (processedPlayers.Contains(plyr.PlayerId))
+                        continue;
+
                     if (plyr.TryGetComponent<PlayerReplicatedComponent>(out var prc))
                     {
+                        //Logger.LogDebug($"[{Time.frameCount}]     Processing packet for [{accountId}, {plyr.PlayerId}, {plyr.Id}] [{index}]");
                         prc.ProcessPacket(packet);
                     }
                     else
                     {
                         Logger.LogError($"Player {accountId} doesn't have a PlayerReplicatedComponent!");
                     }
+
+                    processedPlayers.Add(plyr.PlayerId);
+                    index++;
                 }
             }
             catch (Exception) { }
@@ -1022,6 +1042,7 @@ namespace SIT.Core.Coop
         public int ServerPing { get; set; } = 1;
         public ConcurrentQueue<int> ServerPingSmooth { get; } = new();
         public TimeSpan LastServerPing { get; set; } = DateTime.Now.TimeOfDay;
+        public string LastPacketHash { get; set; } = "";
 
         public bool HighPingMode { get; set; } = false;
         public bool ServerHasStopped { get; set; }
