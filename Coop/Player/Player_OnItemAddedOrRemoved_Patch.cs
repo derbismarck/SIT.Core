@@ -24,9 +24,16 @@ namespace SIT.Core.Coop.Player
         }
 
         [PatchPrefix]
-        public static bool PrePatch(EFT.Player __instance)
+        public static bool PrePatch(EFT.Player __instance,
+            Item item, ItemAddress location, bool added
+            )
         {
+            Logger.LogDebug($"OnItemAddedOrRemoved.PrePatch: {item}/{item.Template}/{item.Template is MagazineTemplate}");
             var result = false;
+
+            if (item.Template is MagazineTemplate)
+                result = true;
+
             return result;
         }
 
@@ -76,6 +83,10 @@ namespace SIT.Core.Coop.Player
 
         public override void Replicated(EFT.Player player, Dictionary<string, object> dict)
         {
+            // if this is us, we've already done this and redoing will break shit
+            if (player.IsYourPlayer)
+                return;
+
             if (HasProcessed(GetType(), player, dict))
                 return;
 
