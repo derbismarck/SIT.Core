@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
 namespace SIT.Core.Coop.Player
 {
@@ -200,7 +199,7 @@ namespace SIT.Core.Coop.Player
             return null;
         }
 
-        public static Collider GetCollider(EFT.Player player, EBodyPartColliderType bodyPartColliderType)
+        public static UnityEngine.Collider GetCollider(EFT.Player player, EBodyPartColliderType bodyPartColliderType)
         {
             return GetBodyPartCollider(player, bodyPartColliderType).Collider;
         }

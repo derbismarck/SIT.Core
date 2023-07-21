@@ -8,7 +8,6 @@ using SIT.Tarkov.Core;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 namespace SIT.Core.Coop.Player
 {
