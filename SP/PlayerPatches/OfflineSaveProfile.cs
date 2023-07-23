@@ -26,10 +26,12 @@ namespace SIT.Core.SP.PlayerPatches
                     )
                 {
                     //Logger.Log(BepInEx.Logging.LogLevel.Info, method.Name);
+                    //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}: OfflineSaveProfile GetMethod successful: {method}");
                     return method;
                 }
             }
             Logger.Log(BepInEx.Logging.LogLevel.Error, "OfflineSaveProfile::Method is not found!");
+            Logger.LogError($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}: OfflineSaveProfile GetMethod failed!");
 
             return null;
         }
@@ -42,33 +44,51 @@ namespace SIT.Core.SP.PlayerPatches
         [PatchPrefix]
         public static bool PatchPrefix(string profileId, RaidSettings ____raidSettings, TarkovApplication __instance, Result<ExitStatus, TimeSpan, object> result)
         {
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}: OfflineSaveProfile PatchPrefix starting");
             // Get scav or pmc profile based on IsScav value
             var profile = ____raidSettings.IsScav
                 ? __instance.GetClientBackEndSession().ProfileOfPet
                 : __instance.GetClientBackEndSession().Profile;
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     OSPPP profile exists: {profile is not null}");
 
             var currentHealth = HealthListener.Instance.CurrentHealth;
+
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     OSPPP calling SaveProfileProgress");
             SaveProfileProgress(result.Value0, profile, currentHealth, ____raidSettings.IsScav);
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     OSPPP SaveProfileProgress exec done");
 
 
             var coopGC = CoopGameComponent.GetCoopGameComponent();
             if (coopGC != null)
             {
+                //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     OSPPP coopGC exists, destroying");
                 UnityEngine.Object.Destroy(coopGC);
+            }
+            else
+            {
+                Logger.LogError($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     OSPPP coopGC already did not exist");
             }
 
             HealthListener.Instance.MyHealthController = null;
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}: OfflineSaveProfile PatchPrefix finished");
             return true;
         }
 
         public static void SaveProfileProgress(ExitStatus exitStatus, Profile profileData, PlayerHealth currentHealth, bool isPlayerScav)
         {
+            Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}: SaveProfileProgress starting");
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP Exit status: {exitStatus.ToString()}");
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP profileData exists: {profileData is not null}");
             // "Disconnecting" from your game in Single Player shouldn't result in losing your gear. This is stupid.
             if (exitStatus == ExitStatus.Left || exitStatus == ExitStatus.MissingInAction)
+            {
+                //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP Detected disco, marked as RunThrough");
                 exitStatus = ExitStatus.Runner;
+            }
 
             // TODO: Remove uneccessary data
             var clonedProfile = profileData.Clone();
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP profileData clone successful: {clonedProfile is not null}");
             //clonedProfile.Encyclopedia = null;
             //clonedProfile.Hideout = null;
             //clonedProfile.Notes = null;
@@ -86,8 +106,12 @@ namespace SIT.Core.SP.PlayerPatches
                 health = currentHealth,
                 isPlayerScav = isPlayerScav
             };
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP constructed SaveProfileRequest");
 
             var convertedJson = request.SITToJson();
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP begin request convertedJson ~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+            //Logger.LogDebug(convertedJson);
+            //Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ end request convertedJson");
             //Logger.LogDebug("SaveProfileProgress =====================================================");
             //Logger.LogDebug(convertedJson);
             Request.Instance.PostJson("/raid/profile/save", convertedJson, timeout: 60 * 1000, debug: true);

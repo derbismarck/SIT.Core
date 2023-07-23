@@ -28,7 +28,7 @@ namespace SIT.Core.Coop.Player
             Item item, ItemAddress location, bool added
             )
         {
-            Logger.LogDebug($"OnItemAddedOrRemoved.PrePatch: {item}/{item.Template}/{item.Template is MagazineTemplate}");
+            //Logger.LogDebug($"OnItemAddedOrRemoved.PrePatch: {item}/{item.Template}/{item.Template is MagazineTemplate}");
             var result = false;
 
             if (item.Template is MagazineTemplate)
