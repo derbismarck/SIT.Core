@@ -167,10 +167,10 @@ namespace SIT.Tarkov.Core
                 // -------------------------------------------------------
 
                 // If this is a ping packet, resolve and create a smooth ping
-                if (packet.ContainsKey("ping"))
+                if (packet.ContainsKey("pong"))
                 {
                     //m_ManualLogSource.LogDebug(packet["ping"].ToString());
-                    var pingStrip = packet["ping"].ToString();
+                    var pingStrip = packet["pong"].ToString();
                     var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
                     var serverPing = (DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
                     coopGameComponent.LastServerPing = timeStampOfPing;
@@ -350,16 +350,19 @@ namespace SIT.Tarkov.Core
                 {
                     await Task.Delay(awaitPeriod);
 
-                    Dictionary<string, object> packet = new();
-                    packet.Add("ping", DateTime.Now.ToString());
-
-                    var json = JsonConvert.SerializeObject(packet.ToJson());
                     if (WebSocket != null)
                     {
                         if (WebSocket.ReadyState == WebSocketSharp.WebSocketState.Open)
                         {
-                            //PatchConstants.Logger.LogDebug($"WS:Ping Send");
-                            WebSocket.Send(json);
+                            if (CoopGameComponent.TryGetCoopGameComponent(out var coopGameComponent))
+                            {
+                                //PatchConstants.Logger.LogDebug($"WS:Ping Send");
+                                PostDownWebSocketImmediately(new System.Collections.Generic.Dictionary<string, object>() {
+                                    { "m", "Ping" },
+                                    { "t", DateTimeOffset.Now.ToString("o") },
+                                    { "accountId", coopGameComponent.AccountId }
+                                });
+                            }
                         }
                     }
                 }
