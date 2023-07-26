@@ -95,6 +95,7 @@ namespace SIT.Tarkov.Core
                 RemoteEndPoint = PatchConstants.GetBackendUrl();
 
             GetHeaders();
+            PeriodicallySendPing();
             PeriodicallySendPooledData();
             if (WebSocket == null)
             {
@@ -334,6 +335,33 @@ namespace SIT.Tarkov.Core
                     PostPingSmooth.Enqueue((int)swPing.ElapsedMilliseconds - awaitPeriod);
                     PostPing = (int)Math.Round(PostPingSmooth.Average());
 
+                }
+            });
+        }
+
+        private Task PeriodicallySendPingTask;
+
+        private void PeriodicallySendPing()
+        {
+            PeriodicallySendPingTask = Task.Run(async () =>
+            {
+                int awaitPeriod = 2000;
+                while (true)
+                {
+                    await Task.Delay(awaitPeriod);
+
+                    Dictionary<string, object> packet = new();
+                    packet.Add("ping", DateTime.Now.ToString());
+
+                    var json = JsonConvert.SerializeObject(packet.ToJson());
+                    if (WebSocket != null)
+                    {
+                        if (WebSocket.ReadyState == WebSocketSharp.WebSocketState.Open)
+                        {
+                            //PatchConstants.Logger.LogDebug($"WS:Ping Send");
+                            WebSocket.Send(json);
+                        }
+                    }
                 }
             });
         }
