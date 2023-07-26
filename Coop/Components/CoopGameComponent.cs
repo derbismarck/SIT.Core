@@ -31,6 +31,7 @@ namespace SIT.Core.Coop
         public WorldInteractiveObject[] ListOfInteractiveObjects { get; set; }
         private Request RequestingObj { get; set; }
         public string ServerId { get; set; } = null;
+        public string AccountId { get; set; } = null;
         public Dictionary<string, EFT.Player> Players { get; private set; } = new();
         BepInEx.Logging.ManualLogSource Logger { get; set; }
         public ConcurrentDictionary<string, ESpawnState> PlayersToSpawn { get; private set; } = new();
@@ -101,7 +102,10 @@ namespace SIT.Core.Coop
             // ----------------------------------------------------
             // Always clear "Players" when creating a new CoopGameComponent
             Players = new Dictionary<string, EFT.Player>();
+            
             var ownPlayer = (LocalPlayer)Singleton<GameWorld>.Instance.RegisteredPlayers.First(x => x.IsYourPlayer);
+            AccountId = ownPlayer.Profile.AccountId;
+
             Players.Add(ownPlayer.Profile.AccountId, ownPlayer);
 
             RequestingObj = Request.GetRequestInstance(true, Logger);
