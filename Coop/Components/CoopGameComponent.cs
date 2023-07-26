@@ -1041,7 +1041,7 @@ namespace SIT.Core.Coop
 
         public int ServerPing { get; set; } = 1;
         public ConcurrentQueue<int> ServerPingSmooth { get; } = new();
-        public TimeSpan LastServerPing { get; set; } = DateTime.Now.TimeOfDay;
+        public DateTimeOffset LastServerPing { get; set; } = DateTimeOffset.Now;
         public string LastPacketHash { get; set; } = "";
 
         public bool HighPingMode { get; set; } = false;

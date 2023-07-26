@@ -169,9 +169,9 @@ namespace SIT.Tarkov.Core
                 if (packet.ContainsKey("ping"))
                 {
                     //m_ManualLogSource.LogDebug(packet["ping"].ToString());
-                    var pingStrip = packet["ping"].ToString().Split(':');
-                    var timeStampOfPing = new TimeSpan(0, int.Parse(pingStrip[0]), int.Parse(pingStrip[1]), int.Parse(pingStrip[2]), int.Parse(pingStrip[3]));
-                    var serverPing = (timeStampOfPing - coopGameComponent.LastServerPing).Milliseconds;
+                    var pingStrip = packet["ping"].ToString();
+                    var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
+                    var serverPing = (DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
                     coopGameComponent.LastServerPing = timeStampOfPing;
                     if (coopGameComponent.ServerPingSmooth.Count > 30)
                         coopGameComponent.ServerPingSmooth.TryDequeue(out _);
@@ -698,6 +698,22 @@ namespace SIT.Tarkov.Core
         //        }
         //    }
         //}
+
+        public DateTimeOffset ParseIso8601Timestamp(string timestampString)
+        {
+            // Parse the timestamp string using the DateTimeOffset.TryParseExact method
+            // The format "o" represents the ISO 8601 format
+            if (DateTimeOffset.TryParseExact(timestampString, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTimeOffset parsedTimestamp))
+            {
+                return parsedTimestamp;
+            }
+            else
+            {
+                // If parsing fails, you can choose to throw an exception or return a default value
+                // In this example, we return DateTimeOffset.MinValue to indicate an error
+                return DateTimeOffset.MinValue;
+            }
+        }
 
         public void Dispose()
         {
