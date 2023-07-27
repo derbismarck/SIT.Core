@@ -163,17 +163,22 @@ namespace SIT.Core.Coop.Player
                 }
             }
 
-            if (dict.ContainsKey("d.w.tpl") || dict.ContainsKey("d.w.id"))
+            if (dict.ContainsKey("d.w.id"))
             {
-                if (aggressorPlayer != null)
+                if (ItemFinder.TryFindItem(dict["d.w.id"].ToString(), out Item item))
                 {
-                    Item item = null;
-                    if (!ItemFinder.TryFindItemOnPlayer(aggressorPlayer, dict["d.w.tpl"].ToString(), dict["d.w.id"].ToString(), out item))
-                        ItemFinder.TryFindItemInWorld(dict["d.w.id"].ToString(), out item);
-
                     if (item is Weapon w)
                     {
                         damageInfo.Weapon = w;
+                    }
+                }
+                else
+                {
+                    var createdItem = Tarkov.Core.Spawners.ItemFactory.CreateItem(dict["d.w.id"].ToString(), dict["d.w.tpl"].ToString());
+                    if (createdItem is Weapon grenade) {
+                        damageInfo.Weapon = grenade;
+                    } else {
+                        damageInfo.Weapon = createdItem;
                     }
                 }
             }
