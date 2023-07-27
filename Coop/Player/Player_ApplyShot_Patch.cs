@@ -31,6 +31,18 @@ namespace SIT.Core.Coop.Player
             if (CallLocally.TryGetValue(__instance.Profile.AccountId, out var expecting) && expecting)
                 result = true;
 
+            var selfId = __instance.ProfileId;
+            var aggressorId = damageInfo.Player.ProfileId;
+            // Don't allow self-damage (protects from grenade bullshit)
+            if (selfId == aggressorId) {
+                result = false;
+            };
+            // Don't allow player damage (protects from frustration)
+            if (selfId.StartsWith("pmc") &&
+                aggressorId.StartsWith("pmc")) {
+                result = false;
+            };
+
             return result;
         }
 
