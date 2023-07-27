@@ -25,7 +25,7 @@ namespace SIT.Core.Coop.Player
         }
 
         [PatchPrefix]
-        public static bool PrePatch(EFT.Player __instance)
+        public static bool PrePatch(EFT.Player __instance, DamageInfo damageInfo)
         {
             var result = false;
             if (CallLocally.TryGetValue(__instance.Profile.AccountId, out var expecting) && expecting)
