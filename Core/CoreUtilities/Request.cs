@@ -172,7 +172,7 @@ namespace SIT.Tarkov.Core
                     //m_ManualLogSource.LogDebug(packet["ping"].ToString());
                     var pingStrip = packet["pong"].ToString();
                     var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
-                    var serverPing = (DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
+                    var serverPing = (int)(DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
                     coopGameComponent.LastServerPing = timeStampOfPing;
                     if (coopGameComponent.ServerPingSmooth.Count > 30)
                         coopGameComponent.ServerPingSmooth.TryDequeue(out _);
