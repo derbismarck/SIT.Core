@@ -173,6 +173,7 @@ namespace SIT.Tarkov.Core
                     var pingStrip = packet["pong"].ToString();
                     var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
                     var serverPing = (int)(DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
+                    Logger.LogDebug("Pong (" + pingStrip + ", " + timeStampOfPing + ", " + serverPing + ")");
                     coopGameComponent.LastServerPing = timeStampOfPing;
                     if (coopGameComponent.ServerPingSmooth.Count > 30)
                         coopGameComponent.ServerPingSmooth.TryDequeue(out _);
@@ -734,7 +735,7 @@ namespace SIT.Tarkov.Core
         {
             // Parse the timestamp string using the DateTimeOffset.TryParseExact method
             // The format "o" represents the ISO 8601 format
-            if (DateTimeOffset.TryParseExact(timestampString, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTimeOffset parsedTimestamp))
+            if (DateTimeOffset.TryParseExact(timestampString, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out DateTimeOffset parsedTimestamp))
             {
                 return parsedTimestamp;
             }
