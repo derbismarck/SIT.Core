@@ -79,12 +79,6 @@ namespace SIT.Core.Coop.Player.Health
 
             CallLocally.Add(player.Profile.AccountId, true);
             player.ActiveHealthController.Kill(killPacket.DamageType);
-            if (player.HandsController is EFT.Player.FirearmController firearmCont)
-            {
-                firearmCont.SetTriggerPressed(false);
-                ReflectionHelpers.GetMethodForType(firearmCont.WeaponSoundPlayer.GetType(), "Release").Invoke(firearmCont.WeaponSoundPlayer, new object[1] { 0f });
-                ReflectionHelpers.GetMethodForType(firearmCont.WeaponSoundPlayer.GetType(), "StopSoundCoroutine").Invoke(firearmCont.WeaponSoundPlayer, new object[0]);
-            }
             //player.PlayerHealthController.Kill(killPacket.DamageType);
         }
 
