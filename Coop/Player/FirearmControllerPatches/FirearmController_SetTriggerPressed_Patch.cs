@@ -114,25 +114,28 @@ namespace SIT.Core.Coop.Player.FirearmControllerPatches
                 return;
             }
 
+            if (!player.PlayerHealthController.IsAlive)
+            {
+                if (player.HandsController is EFT.Player.FirearmController firearmCont)
+                {
+                    firearmCont.SetTriggerPressed(false);
+                }
+                return;
+            }
+
             var taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             taskScheduler.Do((s) =>
             {
                 TriggerPressedPacket tpp = new();
 
                 //Logger.LogInfo("Pressed:Replicated");
-                if (dict.ContainsKey("data"))
-                {
-                    tpp = tpp.DeserializePacketSIT(dict["data"].ToString());
-                    //Logger.LogInfo("packet deserialized, really? tidy!");
-                    //Logger.LogInfo(tpp.ToJson());
-                    //return;
-                }
+                if (!dict.ContainsKey("data"))
+                    return;
+
+                tpp = tpp.DeserializePacketSIT(dict["data"].ToString());
 
                 if (HasProcessed(GetType(), player, tpp))
                     return;
-
-                //if (HasProcessed(GetType(), player, dict))
-                //    return;
 
                 if (!player.TryGetComponent<PlayerReplicatedComponent>(out var prc))
                     return;
@@ -166,39 +169,6 @@ namespace SIT.Core.Coop.Player.FirearmControllerPatches
                     }
                 }
             });
-        }
-
-        void ReplicatedShotEffects(EFT.Player player, bool pressed)
-        {
-            //if(pressed)
-            //{
-            //    var weapon = player.TryGetItemInHands<EFT.InventoryLogic.Weapon>();
-            //    if (weapon != null)
-            //    {
-            //        // Thanks Fullstack0verflow
-            //        // Check whether a bullet can be fired 
-            //        if (weapon.ChamberAmmoCount > 0)
-            //        {
-            //            if (firearmCont.WeaponSoundPlayer == null)
-            //                return;
-
-            //            firearmCont.WeaponSoundPlayer.FireBullet(null, player.Position, UnityEngine.Vector3.zero, 1, false, weapon.FireMode.FireMode == EFT.InventoryLogic.Weapon.EFireMode.fullauto);
-
-            //            var weaponEffectsManager
-            //                = ReflectionHelpers.GetFieldFromTypeByFieldType(typeof(EFT.Player.FirearmController), typeof(WeaponEffectsManager))
-            //                .GetValue(firearmCont) as WeaponEffectsManager;
-            //            if (weaponEffectsManager == null)
-            //                return;
-
-            //            weaponEffectsManager.PlayShotEffects(player.IsVisible, player.Distance);
-            //        }
-            //        else
-            //        {
-            //            ReflectionHelpers.GetMethodForType(firearmCont.GetType(), "DryShot", findFirst: true)
-            //                .Invoke(firearmCont, new object[] { 0, false });
-            //        }
-            //    }
-            //}
         }
 
         public class TriggerPressedPacket : BasePlayerPacket
