@@ -170,7 +170,7 @@ namespace SIT.Tarkov.Core
                 if (packet.ContainsKey("pong"))
                 {
                     //m_ManualLogSource.LogDebug(packet["ping"].ToString());
-                    var pingStrip = packet["pong"].ToString();
+                    var pingStrip = ((DateTime)packet["pong"]).ToString("o");
                     var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
                     var serverPing = (int)(DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
                     Logger.LogDebug("Pong (" + pingStrip + ", " + timeStampOfPing + ", " + serverPing + ")");
@@ -358,11 +358,15 @@ namespace SIT.Tarkov.Core
                             if (CoopGameComponent.TryGetCoopGameComponent(out var coopGameComponent))
                             {
                                 PatchConstants.Logger.LogDebug($"WS:Ping Send");
-                                PostDownWebSocketImmediately(new System.Collections.Generic.Dictionary<string, object>() {
+
+                                Dictionary<string, object> packet = new Dictionary<string, object> {
                                     { "m", "Ping" },
                                     { "t", DateTimeOffset.Now.ToString("o") },
-                                    { "accountId", coopGameComponent.AccountId }
-                                });
+                                    { "accountId", coopGameComponent.AccountId },
+                                    { "serverId", coopGameComponent.ServerId }
+                                };
+
+                                Request.Instance.PostJson("/coop/server/update", packet.ToJson());
                             }
                         }
                     }
