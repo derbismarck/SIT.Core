@@ -357,7 +357,7 @@ namespace SIT.Tarkov.Core
                         {
                             if (CoopGameComponent.TryGetCoopGameComponent(out var coopGameComponent))
                             {
-                                //PatchConstants.Logger.LogDebug($"WS:Ping Send");
+                                PatchConstants.Logger.LogDebug($"WS:Ping Send");
                                 PostDownWebSocketImmediately(new System.Collections.Generic.Dictionary<string, object>() {
                                     { "m", "Ping" },
                                     { "t", DateTimeOffset.Now.ToString("o") },
