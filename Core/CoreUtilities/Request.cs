@@ -95,7 +95,6 @@ namespace SIT.Tarkov.Core
                 RemoteEndPoint = PatchConstants.GetBackendUrl();
 
             GetHeaders();
-            PeriodicallySendPing();
             PeriodicallySendPooledData();
             if (WebSocket == null)
             {
@@ -167,13 +166,12 @@ namespace SIT.Tarkov.Core
                 // -------------------------------------------------------
 
                 // If this is a ping packet, resolve and create a smooth ping
-                if (packet.ContainsKey("pong"))
+                if (packet.ContainsKey("ping"))
                 {
                     //m_ManualLogSource.LogDebug(packet["ping"].ToString());
-                    var pingStrip = ((DateTime)packet["pong"]).ToString("o");
-                    var timeStampOfPing = ParseIso8601Timestamp(pingStrip);
-                    var serverPing = (int)(DateTimeOffset.Now - timeStampOfPing).TotalMilliseconds;
-                    Logger.LogDebug("Pong (" + pingStrip + ", " + timeStampOfPing + ", " + serverPing + ")");
+                    var pingStrip = packet["ping"].ToString().Split(':');
+                    var timeStampOfPing = new TimeSpan(0, int.Parse(pingStrip[0]), int.Parse(pingStrip[1]), int.Parse(pingStrip[2]), int.Parse(pingStrip[3]));
+                    var serverPing = (timeStampOfPing - coopGameComponent.LastServerPing).Milliseconds;
                     coopGameComponent.LastServerPing = timeStampOfPing;
                     if (coopGameComponent.ServerPingSmooth.Count > 30)
                         coopGameComponent.ServerPingSmooth.TryDequeue(out _);
@@ -186,7 +184,7 @@ namespace SIT.Tarkov.Core
                 if (packet.ContainsKey("endSession") && MatchmakerAcceptPatches.IsClient)
                 {
                     Logger.LogDebug("Received EndSession from Server. Ending Game.");
-                    if(coopGameComponent.LocalGameInstance == null)
+                    if (coopGameComponent.LocalGameInstance == null)
                         return;
 
                     coopGameComponent.ServerHasStopped = true;
@@ -336,40 +334,6 @@ namespace SIT.Tarkov.Core
                     PostPingSmooth.Enqueue((int)swPing.ElapsedMilliseconds - awaitPeriod);
                     PostPing = (int)Math.Round(PostPingSmooth.Average());
 
-                }
-            });
-        }
-
-        private Task PeriodicallySendPingTask;
-
-        private void PeriodicallySendPing()
-        {
-            PeriodicallySendPingTask = Task.Run(async () =>
-            {
-                int awaitPeriod = 2000;
-                while (true)
-                {
-                    await Task.Delay(awaitPeriod);
-
-                    if (WebSocket != null)
-                    {
-                        if (WebSocket.ReadyState == WebSocketSharp.WebSocketState.Open)
-                        {
-                            if (CoopGameComponent.TryGetCoopGameComponent(out var coopGameComponent))
-                            {
-                                PatchConstants.Logger.LogDebug($"WS:Ping Send");
-
-                                Dictionary<string, object> packet = new Dictionary<string, object> {
-                                    { "m", "Ping" },
-                                    { "t", DateTimeOffset.Now.ToString("o") },
-                                    { "accountId", coopGameComponent.AccountId },
-                                    { "serverId", coopGameComponent.ServerId }
-                                };
-
-                                Request.Instance.PostJson("/coop/server/update", packet.ToJson());
-                            }
-                        }
-                    }
                 }
             });
         }
@@ -734,22 +698,6 @@ namespace SIT.Tarkov.Core
         //        }
         //    }
         //}
-
-        public DateTimeOffset ParseIso8601Timestamp(string timestampString)
-        {
-            // Parse the timestamp string using the DateTimeOffset.TryParseExact method
-            // The format "o" represents the ISO 8601 format
-            if (DateTimeOffset.TryParseExact(timestampString, "o", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out DateTimeOffset parsedTimestamp))
-            {
-                return parsedTimestamp;
-            }
-            else
-            {
-                // If parsing fails, you can choose to throw an exception or return a default value
-                // In this example, we return DateTimeOffset.MinValue to indicate an error
-                return DateTimeOffset.MinValue;
-            }
-        }
 
         public void Dispose()
         {
