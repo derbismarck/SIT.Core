@@ -31,7 +31,6 @@ namespace SIT.Core.Coop
         public WorldInteractiveObject[] ListOfInteractiveObjects { get; set; }
         private Request RequestingObj { get; set; }
         public string ServerId { get; set; } = null;
-        public string AccountId { get; set; } = null;
         public Dictionary<string, EFT.Player> Players { get; private set; } = new();
         BepInEx.Logging.ManualLogSource Logger { get; set; }
         public ConcurrentDictionary<string, ESpawnState> PlayersToSpawn { get; private set; } = new();
@@ -62,7 +61,7 @@ namespace SIT.Core.Coop
         {
             if (CoopPatches.CoopGameComponentParent == null)
                 return null;
-          
+
             CoopPatches.CoopGameComponentParent.TryGetComponent<CoopGameComponent>(out var coopGameComponent);
             return coopGameComponent;
         }
@@ -102,10 +101,7 @@ namespace SIT.Core.Coop
             // ----------------------------------------------------
             // Always clear "Players" when creating a new CoopGameComponent
             Players = new Dictionary<string, EFT.Player>();
-            
             var ownPlayer = (LocalPlayer)Singleton<GameWorld>.Instance.RegisteredPlayers.First(x => x.IsYourPlayer);
-            AccountId = ownPlayer.Profile.AccountId;
-
             Players.Add(ownPlayer.Profile.AccountId, ownPlayer);
 
             RequestingObj = Request.GetRequestInstance(true, Logger);
@@ -132,7 +128,7 @@ namespace SIT.Core.Coop
 
         }
 
-      
+
 
         void OnDestroy()
         {
@@ -163,11 +159,11 @@ namespace SIT.Core.Coop
 
         TimeSpan LateUpdateSpan = TimeSpan.Zero;
         Stopwatch swActionPackets { get; } = new Stopwatch();
-        bool PerformanceCheck_ActionPackets { get; set; } = false; 
+        bool PerformanceCheck_ActionPackets { get; set; } = false;
 
         void LateUpdate()
         {
-            if(ServerHasStopped && !ServerHasStoppedActioned)
+            if (ServerHasStopped && !ServerHasStoppedActioned)
             {
                 ServerHasStoppedActioned = true;
                 try
@@ -180,7 +176,7 @@ namespace SIT.Core.Coop
 
             var DateTimeStart = DateTime.Now;
 
-            if(!PluginConfigSettings.Instance.CoopSettings.ForceHighPingMode)
+            if (!PluginConfigSettings.Instance.CoopSettings.ForceHighPingMode)
                 HighPingMode = ServerPing > PING_LIMIT_HIGH;
 
 
@@ -304,7 +300,7 @@ namespace SIT.Core.Coop
             if (GetServerId() == null)
                 return;
 
-            
+
             while (RunAsyncTasks)
             {
                 await Task.Delay(10000);
@@ -350,10 +346,10 @@ namespace SIT.Core.Coop
                 if (!m_CharactersJson.Any())
                     return;
 
-                if(m_CharactersJson[0].ContainsKey("notFound"))
+                if (m_CharactersJson[0].ContainsKey("notFound"))
                 {
                     // Game is broken and doesn't exist!
-                    if(LocalGameInstance != null)
+                    if (LocalGameInstance != null)
                     {
                         this.ServerHasStopped = true;
                     }
@@ -477,7 +473,7 @@ namespace SIT.Core.Coop
                     }
                 }
 
-                
+
                 yield return waitEndOfFrame;
             }
         }
@@ -611,7 +607,7 @@ namespace SIT.Core.Coop
             //        //Logger.LogDebug($"profile id {profile.Id}");
             //    }
 
-                
+
 
             //    // Send to be loaded
             //    PlayersToSpawnProfiles[accountId] = profile;
@@ -847,10 +843,10 @@ namespace SIT.Core.Coop
                 if (IResult.Succeed == true)
                 {
                     if (successCallback != null)
-                            successCallback();
+                        successCallback();
                 }
 
-                if(person.TryGetItemInHands<Item>() != null)
+                if (person.TryGetItemInHands<Item>() != null)
                 {
                     if (successCallback != null)
                         successCallback();
@@ -883,12 +879,12 @@ namespace SIT.Core.Coop
             if (!packet.ContainsKey("m"))
                 return;
 
-            foreach(var coopPatch in CoopPatches.NoMRPPatches)
+            foreach (var coopPatch in CoopPatches.NoMRPPatches)
             {
                 var imrwp = coopPatch as IModuleReplicationWorldPatch;
-                if(imrwp != null)
+                if (imrwp != null)
                 {
-                    if(imrwp.MethodName == packet["m"].ToString())
+                    if (imrwp.MethodName == packet["m"].ToString())
                     {
                         imrwp.Replicated(packet);
                     }
@@ -903,7 +899,7 @@ namespace SIT.Core.Coop
                 case "Door_Interact":
                     Door_Interact_Patch.Replicated(packet);
                     break;
-                    
+
             }
         }
 
@@ -1045,7 +1041,7 @@ namespace SIT.Core.Coop
 
         public int ServerPing { get; set; } = 1;
         public ConcurrentQueue<int> ServerPingSmooth { get; } = new();
-        public DateTimeOffset LastServerPing { get; set; } = DateTimeOffset.Now;
+        public TimeSpan LastServerPing { get; set; } = DateTime.Now.TimeOfDay;
         public string LastPacketHash { get; set; } = "";
 
         public bool HighPingMode { get; set; } = false;
@@ -1146,5 +1142,5 @@ namespace SIT.Core.Coop
         Error = 99,
     }
 
-    
+
 }
