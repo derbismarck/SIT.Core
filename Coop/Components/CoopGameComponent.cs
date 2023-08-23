@@ -1438,16 +1438,15 @@ namespace SIT.Core.Coop
             if (coopGame == null)
                 return;
 
-            var numberOfPlayersAlive = PlayerUsers.Count(x => x.HealthController.IsAlive);
-            // gathering extracted
-            var numberOfPlayersExtracted = coopGame.ExtractedPlayers.Count;
-            GUI.Label(rect, $"Players (Alive): {numberOfPlayersAlive}");
+            var numberOfPlayers = Players.Count(x => x.Value.ProfileId.StartsWith("pmc"));
+            GUI.Label(rect, $"Players: {numberOfPlayers}");
+
+            var numberOfLiveAI = Players.Count(x => !x.Value.ProfileId.StartsWith("pmc") && x.Value.HealthController.IsAlive);
+            var numberOfDeadAI = Players.Count(x => !x.Value.ProfileId.StartsWith("pmc") && !x.Value.HealthController.IsAlive);
             rect.y += 15;
-            GUI.Label(rect, $"Players (Dead): {numberOfPlayersDead}");
+            GUI.Label(rect, $"Live AI: {numberOfLiveAI}");
             rect.y += 15;
-            GUI.Label(rect, $"Players (Extracted): {numberOfPlayersExtracted}");
-            rect.y += 15;
-            GUI.Label(rect, $"Bots: {PlayerBots.Length}");
+            GUI.Label(rect, $"Dead AI: {numberOfDeadAI}");
             rect.y += 15;
 
             var quitState = GetQuitState();
