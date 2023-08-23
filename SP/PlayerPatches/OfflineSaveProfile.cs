@@ -8,6 +8,7 @@ using SIT.Tarkov.Core;
 using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine.Networking.Match;
 
 namespace SIT.Core.SP.PlayerPatches
 {
@@ -91,7 +92,39 @@ namespace SIT.Core.SP.PlayerPatches
             var convertedJson = request.SITToJson();
             //Logger.LogDebug("SaveProfileProgress =====================================================");
             //Logger.LogDebug(convertedJson);
-            _ = AkiBackendCommunication.Instance.PostJsonAsync("/raid/profile/save", convertedJson);
+            int retryCount = 0;
+            const int maxRetries = 15; // Limit the number of retries
+            const int timeoutMs = 20 * 1000; // Delay between retries in milliseconds
+
+            while (true)
+            {
+                string result = null;
+
+                try
+                {
+                    Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP attempt #{retryCount + 1} to post JSON...");
+                    result = AkiBackendCommunication.Instance.PostJson("/raid/profile/save", convertedJson, timeout: timeoutMs, debug: true);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     Error while posting JSON: {e}");
+                }
+
+                // Check if result is null or empty
+                if (!string.IsNullOrEmpty(result))
+                {
+                    Logger.LogDebug($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     SPP post success, return: {result}");
+                    break; // If result is not null or empty, exit the loop
+                }
+
+                retryCount++;
+
+                if (retryCount >= maxRetries)
+                {
+                    Logger.LogError($"{DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff")}:     Maximum retry attempts reached.");
+                    break; // If max retries reached, exit the loop
+                }
+            }
             //_ = AkiBackendCommunication.Instance.PostJsonAsync("/raid/profile/save", convertedJson, timeout: 10 * 1000, debug: false);
 
 
