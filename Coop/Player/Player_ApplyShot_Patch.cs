@@ -26,11 +26,25 @@ namespace SIT.Core.Coop.Player
         }
 
         [PatchPrefix]
-        public static bool PrePatch(EFT.Player __instance)
+        public static bool PrePatch(EFT.Player __instance, DamageInfo damageInfo)
         {
             var result = false;
             if (CallLocally.Contains(__instance.ProfileId))
                 result = true;
+
+            var selfId = __instance.ProfileId;
+            var aggressorId = damageInfo.Player.iPlayer.ProfileId;
+            // Don't allow self-damage (protects from grenade bullshit)
+            if (selfId == aggressorId)
+            {
+                result = false;
+            };
+            // Don't allow player damage (protects from frustration)
+            if (selfId.StartsWith("pmc") &&
+                aggressorId.StartsWith("pmc"))
+            {
+                result = false;
+            };
 
             return result;
         }

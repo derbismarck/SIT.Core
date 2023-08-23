@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using SIT.Core.Misc;
 using SIT.Tarkov.Core;
 using System;
@@ -58,7 +59,22 @@ namespace SIT.Core.Coop.Player
             //}
             //return result;
 
-            return true;
+            var result = true;
+            var selfId = __instance.ProfileId;
+            var aggressorId = damageInfo.Player.iPlayer.ProfileId;
+            // Don't allow self-damage (protects from grenade bullshit)
+            if (selfId == aggressorId)
+            {
+                result = false;
+            };
+            // Don't allow player damage (protects from frustration)
+            if (selfId.StartsWith("pmc") &&
+                aggressorId.StartsWith("pmc"))
+            {
+                result = false;
+            };
+
+            return result;
         }
 
         //[PatchPostfix]
