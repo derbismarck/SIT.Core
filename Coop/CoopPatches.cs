@@ -92,6 +92,7 @@ namespace SIT.Core.Coop
                 NoMRPPatches.Add(new WeaponSoundPlayer_FireSonicSound_Patch());
                 NoMRPPatches.Add(new Player_LeavingGame_Patch());
                 NoMRPPatches.Add(new Door_Interact_Patch());
+                NoMRPPatches.Add(new Switch_Interact_Patch());
                 NoMRPPatches.Add(new WorldInteractiveObject_Interact_Patch());
             }
 
