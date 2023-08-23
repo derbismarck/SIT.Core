@@ -94,8 +94,7 @@ namespace SIT.Core.Configuration
                 //    SETTING_PlayerStateTickRateInMS = -333;
                 SETTING_PlayerStateTickRateInMS = 333;
 
-                SETTING_HeadshotsAlwaysKill = Plugin.Instance.Config.Bind
-                  ("Coop", "HeadshotsAlwaysKill", true, new ConfigDescription("Enable to make headshots actually work, no more tanking definite kills!")).Value;
+                SETTING_HeadshotsAlwaysKill = false;
 
                 SETTING_ShowFeed = Plugin.Instance.Config.Bind
                   ("Coop", "ShowFeed", true, new ConfigDescription("Enable the feed on the bottom right of the screen which shows player/bot spawns, kills, etc.")).Value;
@@ -114,8 +113,7 @@ namespace SIT.Core.Configuration
                 ForceHighPingMode = Plugin.Instance.Config.Bind("Coop", "ForceHighPingMode", false
                         , new ConfigDescription("Forces the High Ping Mode which allows some actions to not round-trip. This may be useful if you have large input lag")).Value;
 
-                RunThroughOnServerStop = Plugin.Instance.Config.Bind("Coop", "RunThroughOnServerStop", true
-                        , new ConfigDescription("Controls whether clients still in-raid when server dies will receive a Run Through (true) or Survived (false).")).Value;
+                RunThroughOnServerStop = false;
 
                 BotWavesDisableStopper = Plugin.Instance.Config.Bind("Coop", "BotWavesDisableStopper", false
                         , new ConfigDescription("Disable the function StopBotSpawningAfterTimer, so not gonna disable bot spawning after 180 sec")).Value;
