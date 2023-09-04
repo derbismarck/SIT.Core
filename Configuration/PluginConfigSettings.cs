@@ -115,8 +115,7 @@ namespace SIT.Core.Configuration
 
                 RunThroughOnServerStop = false;
 
-                BotWavesDisableStopper = Plugin.Instance.Config.Bind("Coop", "BotWavesDisableStopper", false
-                        , new ConfigDescription("Disable the function StopBotSpawningAfterTimer, so not gonna disable bot spawning after 180 sec")).Value;
+                BotWavesDisableStopper = true;
 
 
                 Logger.LogDebug($"SETTING_DEBUGSpawnDronesOnServer: {SETTING_DEBUGSpawnDronesOnServer}");
