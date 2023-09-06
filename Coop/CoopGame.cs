@@ -629,6 +629,8 @@ namespace SIT.Core.Coop
                 _ => 16,
             };
 
+            MaxBotCount = 20; // BotMax is not obeyed for some reason, let's just always use 20.
+
             int numberOfBots = shouldSpawnBots ? MaxBotCount : 0;
             //Logger.LogDebug($"vmethod_4: Number of Bots: {numberOfBots}");
 
