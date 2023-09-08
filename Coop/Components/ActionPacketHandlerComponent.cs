@@ -137,6 +137,9 @@ namespace SIT.Core.Coop.Components
                 case "Door_Interact":
                     Door_Interact_Patch.Replicated(packet);
                     break;
+                case "KeycardDoor_Interact":
+                    KeycardDoor_Interact_Patch.Replicated(packet);
+                    break;
                 case "Switch_Interact":
                     Switch_Interact_Patch.Replicated(packet);
                     break;

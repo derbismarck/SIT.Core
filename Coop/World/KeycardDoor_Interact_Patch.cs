@@ -11,11 +11,11 @@ using System.Reflection;
 
 namespace SIT.Core.Coop.World
 {
-    internal class Door_Interact_Patch : ModulePatch
+    internal class KeycardDoor_Interact_Patch : ModulePatch
     {
-        public static Type InstanceType => typeof(Door);
+        public static Type InstanceType => typeof(KeycardDoor);
 
-        public static string MethodName => "Door_Interact";
+        public static string MethodName => "KeycardDoor_Interact";
 
         public static List<string> CallLocally = new();
 
@@ -39,13 +39,13 @@ namespace SIT.Core.Coop.World
             if (HasProcessed(packet))
                 return;
 
-            Logger.LogDebug("Door_Interact_Patch:Replicated");
+            Logger.LogDebug("KeycardDoor_Interact_Patch:Replicated");
             if (Enum.TryParse(packet["type"].ToString(), out EInteractionType interactionType))
             {
-                WorldInteractiveObject door;
-                door = CoopGameComponent.GetCoopGameComponent().ListOfInteractiveObjects.FirstOrDefault(x => x.Id == packet["doorId"].ToString());
-                Logger.LogDebug("Door_Interact_Patch:Replicated: Searching for correct door...");
-                if (door != null)
+                WorldInteractiveObject keycardDoor;
+                keycardDoor = CoopGameComponent.GetCoopGameComponent().ListOfInteractiveObjects.FirstOrDefault(x => x.Id == packet["keycardDoorId"].ToString());
+                Logger.LogDebug("KeycardDoor_Interact_Patch:Replicated: Searching for correct keycardDoor...");
+                if (keycardDoor != null)
                 {
                     string methodName = string.Empty;
                     switch (interactionType)
@@ -66,19 +66,19 @@ namespace SIT.Core.Coop.World
                             methodName = "Lock";
                             break;
                     }
-                    Logger.LogDebug("Door_Interact_Patch:Replicated: Invoking interaction for door '" + door.Id + "': '" + methodName + "' (" + interactionType + ")");
-                    ReflectionHelpers.InvokeMethodForObject(door, methodName);
+                    Logger.LogDebug("KeycardDoor_Interact_Patch:Replicated: Invoking interaction for keycardDoor '" + keycardDoor.Id + "': '" + methodName + "' (" + interactionType + ")");
+                    ReflectionHelpers.InvokeMethodForObject(keycardDoor, methodName);
                 }
                 else
                 {
-                    Logger.LogDebug("Door_Interact_Patch:Replicated: Couldn't find Door in at all in world?");
+                    Logger.LogDebug("KeycardDoor_Interact_Patch:Replicated: Couldn't find KeycardDoor in at all in world?");
                 }
 
 
             }
             else
             {
-                Logger.LogError("Door_Interact_Patch:Replicated:EInteractionType did not parse correctly!");
+                Logger.LogError("KeycardDoor_Interact_Patch:Replicated:EInteractionType did not parse correctly!");
             }
         }
 
@@ -89,7 +89,7 @@ namespace SIT.Core.Coop.World
         }
 
         [PatchPrefix]
-        public static bool Prefix(Door __instance)
+        public static bool Prefix(KeycardDoor __instance)
         {
             if (CallLocally.Contains(__instance.Id))
                 return true;
@@ -98,7 +98,7 @@ namespace SIT.Core.Coop.World
         }
 
         [PatchPostfix]
-        public static void Postfix(Door __instance, InteractionResult interactionResult)
+        public static void Postfix(KeycardDoor __instance, InteractionResult interactionResult)
         {
             if (CallLocally.Contains(__instance.Id))
             {
@@ -110,13 +110,13 @@ namespace SIT.Core.Coop.World
             if (coopGC == null)
                 return;
 
-            Logger.LogDebug($"Door_Interact_Patch:Postfix:Door Id:{__instance.Id}");
+            Logger.LogDebug($"KeycardDoor_Interact_Patch:Postfix:KeycardDoor Id:{__instance.Id}");
 
             Dictionary<string, object> packet = new()
             {
                 { "t", DateTime.Now.Ticks.ToString("G") },
                 { "serverId", CoopGameComponent.GetServerId() },
-                { "doorId", __instance.Id },
+                { "keycardDoorId", __instance.Id },
                 { "type", interactionResult.InteractionType.ToString() },
                 { "m", MethodName }
             };

@@ -83,6 +83,7 @@ namespace SIT.Core.Coop
             if (!NoMRPPatches.Any())
             {
                 NoMRPPatches.Add(new Door_Interact_Patch());
+                NoMRPPatches.Add(new KeycardDoor_Interact_Patch());
                 NoMRPPatches.Add(new Player_Init_Coop_Patch(m_Config));
                 NoMRPPatches.Add(new Switch_Interact_Patch());
                 NoMRPPatches.Add(new WeaponSoundPlayer_FireSonicSound_Patch());
