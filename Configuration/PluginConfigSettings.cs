@@ -44,8 +44,7 @@ namespace SIT.Core.Configuration
 
             public void GetSettings()
             {
-                UseSITGarbageCollector = Plugin.Instance.Config.Bind
-                ("Advanced", "UseSITGarbageCollector", true, new ConfigDescription("Whether to use the Garbage Collector developed in to SIT OR leave it to BSG/Unity")).Value;
+                UseSITGarbageCollector = false;
 
             }
         }
