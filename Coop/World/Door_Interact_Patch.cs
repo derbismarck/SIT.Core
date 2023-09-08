@@ -13,7 +13,8 @@ namespace SIT.Core.Coop.World
 {
     internal class Door_Interact_Patch : ModulePatch
     {
-        public static Type InstanceType => typeof(Door);
+        public static Type[] InstanceTypes => new Type[] { typeof(Door), typeof(KeycardDoor) };
+
 
         public static string MethodName => "Door_Interact";
 
@@ -81,8 +82,20 @@ namespace SIT.Core.Coop.World
 
         protected override MethodBase GetTargetMethod()
         {
-            return ReflectionHelpers.GetAllMethodsForType(InstanceType)
-                .FirstOrDefault(x => x.Name == "Interact" && x.GetParameters().Length == 1 && x.GetParameters()[0].Name == "interactionResult");
+            var methods = new List<MethodBase>();
+
+            foreach (var type in InstanceTypes)
+            {
+                var method = ReflectionHelpers.GetAllMethodsForType(type)
+                    .FirstOrDefault(x => x.Name == "Interact" && x.GetParameters().Length == 1 && x.GetParameters()[0].Name == "interactionResult");
+
+                if (method != null)
+                {
+                    methods.Add(method);
+                }
+            }
+
+            return methods.Count > 0 ? methods[0] : null; // or return methods.ToArray() if Harmony supports patching multiple methods at once
         }
 
         [PatchPrefix]
@@ -107,7 +120,7 @@ namespace SIT.Core.Coop.World
             if (coopGC == null)
                 return;
 
-            //Logger.LogDebug($"Door_Interact_Patch:Postfix:Door Id:{__instance.Id}");
+            Logger.LogDebug($"Door_Interact_Patch:Postfix:Door Id:{__instance.Id}");
 
             Dictionary<string, object> packet = new()
             {
@@ -119,7 +132,7 @@ namespace SIT.Core.Coop.World
             };
 
             var packetJson = packet.SITToJson();
-            //Logger.LogDebug(packetJson);
+            Logger.LogDebug(packetJson);
 
             //Request.Instance.PostJsonAndForgetAsync("/coop/server/update", packetJson);
             AkiBackendCommunication.Instance.PostDownWebSocketImmediately(packet);
