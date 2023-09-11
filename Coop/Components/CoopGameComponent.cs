@@ -435,6 +435,11 @@ namespace SIT.Core.Coop
                 return;
             }
 
+            if (Input.GetKeyDown(KeyCode.F9))
+            {
+                LocalGameInstance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, ExitStatus.Survived, "", 0);
+            }
+
             if (!MatchmakerAcceptPatches.IsClient)
             {
 
