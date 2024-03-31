@@ -3,6 +3,7 @@ using EFT;
 using EFT.CameraControl;
 using EFT.UI;
 using HarmonyLib;
+using SIT.Core.Misc;
 using System;
 using UnityEngine;
 
@@ -84,6 +85,11 @@ namespace SIT.Core.Coop.FreeCamera
                 _lastTime = DateTime.Now;
                 ToggleCamera();
                 ToggleUi();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F7))
+            {
+                GCHelpers.ClearGarbage(emptyTheSet: true, unloadAssets: true);
             }
 
             // Player is dead. Remove all effects!
